@@ -7,7 +7,8 @@ from ocr import *
 from quiz import *
 import pytube
 import whisper
-
+from ytPlus import *
+from gptKaam import *
 
 st.set_page_config(page_title="Learn Anything", page_icon=":books:", layout="wide")
 
@@ -41,11 +42,14 @@ st.write("💬 Default text for basic information gathering")
 
 input_type = st.selectbox("Select Type of Input", ["Text", "Image", "Video URL"])
 # search_op = st.text_input("Enter what you want to learn today")
+# user_input = image_file.name
 
 if input_type == "Text":
     user_input = st.text_area("Enter Text Here")
 elif input_type == "Image":
+    
     image_file = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
+    # user_input = image_file.name
     if image_file is not None:
         image = Image.open(image_file)
         user_input = image_file.name
@@ -64,6 +68,7 @@ if st.button("Search"):
 
         # code to get response for user_input from backend API
     elif input_type == "Image":
+
         st.write("You uploaded:", user_input)
 
         with st.spinner('Extracting Text from given Image'):
@@ -88,29 +93,27 @@ if st.button("Search"):
         st.write("You entered Video URL:", user_input)
 
         with st.spinner('Processing the given url'):
+            audio_bytes , valuable = urlToText(user_input)
 
-            data = pytube.YouTube(user_input)
-            audioF = data.streams.get_audio_only()
-            name = audioF.download()
-            
-            text = model.transcribe(name)
+        option = st.selectbox(
+        'What task is to be performed on the video?', options = ['Transcript', 'Summarize', 'Translate'])
 
-            audio_file = open(name, 'rb')
-            audio_bytes = audio_file.read()
+        st.write('You selected:', option)
 
-            valuable = text['text']
-            # st.write(valuable)
-            # st.write(text)
-            results = gpt_3.summarize(valuable)
-            # https://youtu.be/5XBEjlit5LM
-            # inp_val = results
-            # results = ["Result 1", "Result 2", "Result 3"]
-            st.write("audio file of the video: ")
-            st.audio(audio_bytes)
+        number = st.slider("Summary length in words", 0, 300)
 
-            st.write("Here is the summary of the video :")
-
-            st.write(results)
+        # if number > 1:
+        #     # with st.spinner('Processing the given url'):
+                
+        #     #     # audio_bytes , valuable = urlToText(user_input)
+                
+        #         results = gpt_3.summarize(valuable, number)
+        #         st.write()
+        #         st.write("audio file of the video: ")
+        #         st.audio(audio_bytes)
+        #         st.download_button("download audio", audio_bytes)
+        #         st.write("Here is the summary of the video :")
+        #         st.write(results)
 
 
 
