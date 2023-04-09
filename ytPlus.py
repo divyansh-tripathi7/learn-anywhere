@@ -1,15 +1,17 @@
-import pytube, whisper, openai, streamlit
-import streamlit as st
-from PIL import Image
-import requests
-from io import BytesIO
-from quiz import app
-from ocr import *
-from quiz import *
-import pytube
-import whisper
-# import whisper_timestamped
+import pytube, whisper
+import os
+from sumy.summarizers.luhn import LuhnSummarizer
+from sumy.nlp.stemmers import Stemmer
+from sumy.summarizers.lsa import LsaSummarizer as Summarizer
+from sumy.parsers.plaintext import PlaintextParser
+from sumy.nlp.tokenizers import Tokenizer
 from gptKaam import *
+
+gpt_3 = GPT_3(os.getenv('OPENAI_API_KEY'))
+
+
+
+model = whisper.load_model("base")
 
 def urlToText(url):
     data = pytube.YouTube(url)
@@ -17,8 +19,6 @@ def urlToText(url):
     name = audioF.download()
             
     model = whisper.load_model("base")
-
-    # timeStamps = model.
     audio_file = open(name, 'rb')
     audio_bytes = audio_file.read()
     text = model.transcribe(name)
@@ -26,21 +26,29 @@ def urlToText(url):
 
     return audio_bytes, valuable 
 
-#  this gives us transcript 
+url = input("yt url")
 
-def getSummary(valuable):
-    summary = gpt_3.summarize(valuable)
-    return summary
+audioF , text = urlToText(url)
 
-def translate(lang , valuable):
-    print("hello")
-    translated = gpt_3.translate(valuable, lang)
-    return translated
+# print(text)
+print("url to text extracted")
 
-def ytBasic():
-    st.write("✨ Select a video to get information about a YouTube URL 🎥")
-    user_input = st.text_input("Enter Video URL here")
-    return user_input
+# print()
+
+summary=" "
+
+print("summary is being calculated")
+
+parser = PlaintextParser(text, Tokenizer('english'))
+summarizer_1 = LuhnSummarizer()
+summary_1 = summarizer_1(parser.document, 10)
+for sentence in summary_1:
+    summary += str(sentence)
 
 
+lang = input("translate the video into which language?")
+translated = gpt_3.translate(text , lang)
+
+
+print(translated)
 
